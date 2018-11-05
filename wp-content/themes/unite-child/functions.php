@@ -138,7 +138,7 @@ function add_my_post_types_to_query( $query ) {
 function my_edit_content( $content ) {
     global $post;
     
-    // only edit specific post types
+    // only edit specific post types (films)
     $types = array('films' );
     if (is_home() && $post && in_array( $post->post_type, $types, true ) ) {
          $add = "<br>".get_the_term_list( $post->ID, "country", 'Countries: ', ', ', '' ); 
@@ -166,6 +166,27 @@ function my_edit_content( $content ) {
      }
   } );
   
-  
+  // Create the shortcode
+  add_shortcode( 'list-posts-basic', 'rmcc_post_listing_shortcode1' );
+  function rmcc_post_listing_shortcode1( $atts ) {
+      ob_start();
+      $query = new WP_Query( array(
+          'post_type' => 'films',
+          'posts_per_page' => 5,
+          'order' => 'DESC'
+      ) );
+      if ( $query->have_posts() ) { ?>
+          <ul>
+              <?php while ( $query->have_posts() ) : $query->the_post(); ?>
+              <li id="post-<?php the_ID(); ?>" <?php post_class(); ?> style="margin: 0px;">
+                  <a href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
+              </li>
+              <?php endwhile;
+              wp_reset_postdata(); ?>
+          </ul>
+      <?php $myvariable = ob_get_clean();
+      return $myvariable;
+      }
+  }
   
   
