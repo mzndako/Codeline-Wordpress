@@ -135,3 +135,37 @@ function add_my_post_types_to_query( $query ) {
     return $query;
 }
 
+function my_edit_content( $content ) {
+    global $post;
+    
+    // only edit specific post types
+    $types = array('films' );
+    if (is_home() && $post && in_array( $post->post_type, $types, true ) ) {
+         $add = "<br>".get_the_term_list( $post->ID, "country", 'Countries: ', ', ', '' ); 
+         $add .= "; ".get_the_term_list( $post->ID, "genre", 'Genre: ', ', ', '' ); 
+         $add .= "; Ticket Price: ".get_post_meta($post->ID, "ticket_price", true); 
+         $add .= "; Release Date: ".date("F j, Y", strtotime(get_post_meta($post->ID, "release_date", true)));
+         $content = $content.$add;
+    }
+  
+    return $content;
+  }
+  
+  // add the filter when main loop starts
+  add_action( 'loop_start', function( WP_Query $query ) {
+      
+     if ( $query->is_main_query() ) {
+       add_filter( 'the_content', 'my_edit_content', -10 );
+     }
+  } );
+  
+  // remove the filter when main loop ends
+  add_action( 'loop_end', function( WP_Query $query ) {
+     if ( has_filter( 'the_content', 'my_edit_content' ) ) {
+       remove_filter( 'the_content', 'my_edit_content' );
+     }
+  } );
+  
+  
+  
+  
